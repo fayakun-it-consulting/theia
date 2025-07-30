@@ -76,6 +76,11 @@ require('reflect-metadata');
 const { Container } = require('@theia/core/shared/inversify');
 const { FrontendApplicationConfigProvider } = require('@theia/core/lib/browser/frontend-application-config-provider');
 
+// Pandino imports
+const Pandino = require("@pandino/pandino");
+const path = require("path");
+const loaderConfiguration = require("@pandino/loader-configuration-dom@latest/dist/@pandino/loader-configuration-dom.mjs");
+
 FrontendApplicationConfigProvider.set(${this.prettyStringify(this.pck.props.frontend.config)});
 
 ${this.ifMonaco(() => `
@@ -109,6 +114,17 @@ module.exports = (async () => {
     const { messagingFrontendModule } = require('@theia/core/lib/${this.pck.isBrowser() || this.pck.isBrowserOnly()
                 ? 'browser/messaging/messaging-frontend-module'
                 : 'electron-browser/messaging/electron-messaging-frontend-module'}');
+    const pandino = new Pandino({
+    ...loaderConfiguration,
+    });
+
+    // Pandino Framework initialization.
+    await pandino.init();
+    await pandino.start();
+
+    // Storing the root system BundleContext.
+    const context = pandino.getBundleContext();
+
     const container = new Container();
     container.load(messagingFrontendModule);
     ${this.ifBrowserOnly(`const { messagingFrontendOnlyModule } = require('@theia/core/lib/browser-only/messaging/messaging-frontend-only-module');
@@ -148,6 +164,7 @@ ${Array.from(frontendModules.values(), jsModulePath => `\
 
     function start() {
         (window['theia'] = window['theia'] || {}).container = container;
+        (window['pandino'] = window['pandino'] || {}).pandino = pandino;
         return container.get(FrontendApplication).start();
     }
 })();

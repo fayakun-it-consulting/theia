@@ -126,5 +126,10 @@
     "vscode.microsoft-authentication",
     "ms-vscode.references-view",
     "ms-python.vscode-pylance"
-  ]
+  ],
+  "dependencies": {
+    "@pandino/loader-configuration-dom": "^0.8.31",
+    "@pandino/loader-configuration-nodejs": "^0.8.31",
+    "@pandino/pandino": "^0.8.31"
+  }
 }
