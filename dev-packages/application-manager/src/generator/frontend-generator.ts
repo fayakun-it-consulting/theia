@@ -77,9 +77,7 @@ const { Container } = require('@theia/core/shared/inversify');
 const { FrontendApplicationConfigProvider } = require('@theia/core/lib/browser/frontend-application-config-provider');
 
 // Pandino imports
-const Pandino = require("@pandino/pandino");
-const path = require("path");
-const loaderConfiguration = require("@pandino/loader-configuration-dom@latest/dist/@pandino/loader-configuration-dom.mjs");
+import { OSGiBootstrap, LogLevel } from '@pandino/pandino';
 
 FrontendApplicationConfigProvider.set(${this.prettyStringify(this.pck.props.frontend.config)});
 
@@ -114,16 +112,14 @@ module.exports = (async () => {
     const { messagingFrontendModule } = require('@theia/core/lib/${this.pck.isBrowser() || this.pck.isBrowserOnly()
                 ? 'browser/messaging/messaging-frontend-module'
                 : 'electron-browser/messaging/electron-messaging-frontend-module'}');
-    const pandino = new Pandino({
-    ...loaderConfiguration,
+
+    // 1. Start the framework
+    const bootstrap = new OSGiBootstrap({
+        frameworkLogLevel: LogLevel.INFO
     });
 
-    // Pandino Framework initialization.
-    await pandino.init();
-    await pandino.start();
-
-    // Storing the root system BundleContext.
-    const context = pandino.getBundleContext();
+    const framework = await bootstrap.start();
+    const context = framework.getBundleContext();
 
     const container = new Container();
     container.load(messagingFrontendModule);
@@ -164,7 +160,7 @@ ${Array.from(frontendModules.values(), jsModulePath => `\
 
     function start() {
         (window['theia'] = window['theia'] || {}).container = container;
-        (window['pandino'] = window['pandino'] || {}).pandino = pandino;
+        (window['osgi'] = window['osgi'] || {}).osgi = framework;
         return container.get(FrontendApplication).start();
     }
 })();
