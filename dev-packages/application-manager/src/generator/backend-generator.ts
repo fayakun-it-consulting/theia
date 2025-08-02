@@ -62,7 +62,7 @@ process.env.LC_NUMERIC = 'C';
     const { app } = require('electron');
 
     // Pandino imports
-    const { OSGiBootstrap, LogLevel } require('@pandino/pandino');
+    const { OSGiBootstrap, LogLevel } = require('@pandino/pandino');
 
     const config = ${this.prettyStringify(this.pck.props.frontend.config)};
     const isSingleInstance = ${this.pck.props.backend.config.singleInstance === true ? 'true' : 'false'};
