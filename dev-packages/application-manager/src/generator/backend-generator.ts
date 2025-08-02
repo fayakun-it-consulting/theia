@@ -61,6 +61,9 @@ process.env.LC_NUMERIC = 'C';
     const { Container } = require('@theia/core/shared/inversify');
     const { app } = require('electron');
 
+    // Pandino imports
+    const { OSGiBootstrap, LogLevel } require('@pandino/pandino');
+
     const config = ${this.prettyStringify(this.pck.props.frontend.config)};
     const isSingleInstance = ${this.pck.props.backend.config.singleInstance === true ? 'true' : 'false'};
 
@@ -69,6 +72,14 @@ process.env.LC_NUMERIC = 'C';
         app.quit();
         return;
     }
+    
+    // 1. Start the framework
+    const bootstrap = new OSGiBootstrap({
+        frameworkLogLevel: LogLevel.INFO
+    });
+
+    const framework = await bootstrap.start();
+    const context = framework.getBundleContext();
     
     const container = new Container();
     container.load(electronMainApplicationModule);
